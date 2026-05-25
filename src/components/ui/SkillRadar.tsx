@@ -32,8 +32,10 @@ export default function SkillRadar({ skills, size = "md" }: SkillRadarProps) {
   const fontSize = size === "sm" ? 9 : size === "md" ? 10 : 12;
   const outerRadius = size === "sm" ? "70%" : size === "md" ? "75%" : "80%";
 
+  const minHeightPx = size === 'sm' ? '192px' : size === 'md' ? '256px' : '320px';
+
   return (
-    <div className={`w-full relative overflow-hidden bg-neo-bg ${heightClasses[size]}`}>
+    <div className={`w-full relative overflow-hidden bg-neo-bg ${heightClasses[size]}`} style={{ minHeight: minHeightPx }}>
       {/* Background Grid Pattern Accent */}
       <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:12px_12px]" />
       

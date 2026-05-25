@@ -88,7 +88,17 @@ export default function Onboarding() {
 
   React.useEffect(() => {
     const fetchMemberData = async () => {
+      // Aguarda o usuário estar completamente autenticado antes de acessar o Firestore
+      // Isso evita o erro "Missing or insufficient permissions" por race condition
       if (!user) {
+        setInitializing(false);
+        return;
+      }
+
+      // Aguarda o token de ID ser resolvido para garantir que o Firestore receba as credenciais
+      try {
+        await user.getIdToken();
+      } catch {
         setInitializing(false);
         return;
       }
@@ -695,7 +705,7 @@ export default function Onboarding() {
                   <p className="text-[10px] font-black uppercase bg-neo-black text-white px-2">Análise de Campo</p>
                   <p className="text-[8px] font-mono opacity-50 uppercase">Vibe: {skills.vibe_coding}/10</p>
                 </div>
-                <div className="h-64 neo-border border-4 bg-neo-bg flex items-center justify-center relative overflow-hidden group/chart cursor-crosshair">
+                <div className="h-64 neo-border border-4 bg-neo-bg flex items-center justify-center relative overflow-hidden group/chart cursor-crosshair" style={{ minHeight: '256px' }}>
                    <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:12px_12px]"></div>
                    
                    <ResponsiveContainer width="100%" height="100%">
