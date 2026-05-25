@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, db } from '../lib/firebase';
 import { User, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { authLog } from '../lib/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -18,7 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Captura resultado do redirect do Google Sign-In
     getRedirectResult(auth).catch((err) => {
-      console.error('Erro no redirect de login:', err);
+      authLog.error('Erro no redirect de login:', err);
     });
 
     const unsubscribe = auth.onAuthStateChanged((u) => {

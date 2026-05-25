@@ -6,9 +6,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { db } from "../lib/firebase";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis } from "recharts";
 import { X, Plus, Terminal, User, ShieldCheck, Github, Linkedin, Info, Heart, Check, Ban } from "lucide-react";
 import Avatar from "../components/ui/Avatar";
+import { firestoreLog } from "../lib/logger";
 
 const TAG_CATEGORIES = [
   {
@@ -144,7 +145,7 @@ export default function Onboarding() {
           }));
         }
       } catch (error) {
-        console.error("Erro ao buscar dados do membro:", error);
+        firestoreLog.error("Erro ao buscar dados do membro:", error);
       } finally {
         setInitializing(false);
       }
@@ -262,7 +263,7 @@ export default function Onboarding() {
       await setDoc(doc(db, "profiles", user.uid), profileData, { merge: true });
       navigate("/discover");
     } catch (err) {
-      console.error(err);
+      firestoreLog.error("Erro ao registrar perfil:", err);
       alert("Erro ao registrar perfil.");
     } finally {
       setLoading(false);
@@ -705,23 +706,21 @@ export default function Onboarding() {
                   <p className="text-[10px] font-black uppercase bg-neo-black text-white px-2">Análise de Campo</p>
                   <p className="text-[8px] font-mono opacity-50 uppercase">Vibe: {skills.vibe_coding}/10</p>
                 </div>
-                <div className="h-64 neo-border border-4 bg-neo-bg flex items-center justify-center relative overflow-hidden group/chart cursor-crosshair" style={{ minHeight: '256px' }}>
+                <div className="neo-border border-4 bg-neo-bg flex items-center justify-center relative overflow-hidden group/chart cursor-crosshair" style={{ height: '256px', minHeight: '256px' }}>
                    <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:12px_12px]"></div>
                    
-                   <ResponsiveContainer width="100%" height="100%">
-                      <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                        <PolarGrid stroke="#000" strokeWidth={1} strokeDasharray="3 3" />
-                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#000', fontSize: 10, fontWeight: '900', textAnchor: 'middle' }} />
-                        <Radar
-                          name="Skill"
-                          dataKey="A"
-                          stroke="#FF2E93"
-                          strokeWidth={4}
-                          fill="#FF2E93"
-                          fillOpacity={0.4}
-                        />
-                      </RadarChart>
-                   </ResponsiveContainer>
+                   <RadarChart cx="50%" cy="50%" outerRadius="75%" width={256} height={256} data={radarData}>
+                      <PolarGrid stroke="#000" strokeWidth={1} strokeDasharray="3 3" />
+                      <PolarAngleAxis dataKey="subject" tick={{ fill: '#000', fontSize: 10, fontWeight: '900', textAnchor: 'middle' }} />
+                      <Radar
+                        name="Skill"
+                        dataKey="A"
+                        stroke="#FF2E93"
+                        strokeWidth={4}
+                        fill="#FF2E93"
+                        fillOpacity={0.4}
+                      />
+                   </RadarChart>
                 </div>
               </div>
 

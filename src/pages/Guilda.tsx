@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { FileWarning, Skull, Terminal, Zap, Github, Linkedin } from "lucide-react";
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis } from "recharts";
 import { db } from "../lib/firebase";
 import { collection, onSnapshot, query, updateDoc, doc } from "firebase/firestore";
 import { useAuth } from "../contexts/AuthContext";
@@ -62,7 +62,7 @@ export default function Guilda() {
 
     const q = query(collection(db, "members"));
     const unsub = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
       
       // Sort so current user is always first
       data.sort((a, b) => {
@@ -272,24 +272,22 @@ export default function Guilda() {
                     {/* Right: Skills & Canvas */}
                     <div className="flex-1 flex flex-col pt-6 sm:pt-0">
                        
-                       {/* Top Skills Rows - Replaced with Radar */}
-                       <div className="p-4 border-b-4 border-neo-black h-64 bg-neo-bg relative overflow-hidden group/chart cursor-crosshair">
-                          <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:12px_12px]"></div>
-                          <ResponsiveContainer width="100%" height="100%">
-                              <RadarChart cx="50%" cy="50%" outerRadius="75%" data={getRadarData(m.skills)}>
-                                <PolarGrid stroke="#000" strokeWidth={1} strokeDasharray="3 3" />
-                                <PolarAngleAxis dataKey="subject" tick={{ fill: '#000', fontSize: 10, fontWeight: '900', textAnchor: 'middle' }} />
-                                <Radar
-                                  name="Skill"
-                                  dataKey="A"
-                                  stroke="#FF2E93"
-                                  strokeWidth={4}
-                                  fill="#FF2E93"
-                                  fillOpacity={0.4}
-                                />
-                              </RadarChart>
-                          </ResponsiveContainer>
-                       </div>
+                       {/* Top Skills Rows - Radar */}
+                       <div className="p-4 border-b-4 border-neo-black bg-neo-bg relative overflow-hidden group/chart cursor-crosshair flex items-center justify-center" style={{ height: '256px', minHeight: '256px' }}>
+                           <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:12px_12px]"></div>
+                           <RadarChart cx="50%" cy="50%" outerRadius="75%" width={256} height={256} data={getRadarData(m.skills)}>
+                                 <PolarGrid stroke="#000" strokeWidth={1} strokeDasharray="3 3" />
+                                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#000', fontSize: 10, fontWeight: '900', textAnchor: 'middle' }} />
+                                 <Radar
+                                   name="Skill"
+                                   dataKey="A"
+                                   stroke="#FF2E93"
+                                   strokeWidth={4}
+                                   fill="#FF2E93"
+                                   fillOpacity={0.4}
+                                 />
+                           </RadarChart>
+                        </div>
 
                        {/* Canvas (Loves / Vetoes / Comfort) */}
                        <div className="p-4 flex-1 bg-white grid grid-cols-1 md:grid-cols-3 gap-4 items-start">

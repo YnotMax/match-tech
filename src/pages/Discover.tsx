@@ -10,6 +10,7 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } fro
 import { db } from "../lib/firebase";
 import { collection, onSnapshot, query, updateDoc, doc } from "firebase/firestore";
 import { useAuth } from "../contexts/AuthContext";
+import { firestoreLog, apiLog } from "../lib/logger";
 
 export default function Discover() {
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -34,7 +35,7 @@ export default function Discover() {
     // Fetch profiles collection in real-time
     const q = query(collection(db, "profiles"));
     const unsub = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
       
       // Sort: current logged in user first, then alphabetically
       data.sort((a, b) => {
@@ -152,14 +153,14 @@ export default function Discover() {
         try {
           await updateDoc(doc(db, "profiles", m.id), updateData);
         } catch (dbErr) {
-          console.error("Erro ao salvar sina no banco:", dbErr);
+          firestoreLog.error("Erro ao salvar sina no banco:", dbErr);
         }
         setSelectedProfile({ ...m, ...updateData });
       } else {
         alert("Erro no backend: " + JSON.stringify(data));
       }
     } catch (e: any) {
-      console.error(e);
+      apiLog.error("Erro ao chamar o roast:", e);
       alert("Erro ao chamar o roast.");
     } finally {
       clearInterval(interval);
