@@ -1,0 +1,156 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} { allow read, write: if false; }
+
+    function isValidId(id) { 
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    function isSignedIn() { 
+      return request.auth != null; 
+    }
+    
+    function isValidMember(data) {
+      return data.keys().hasAll(['userId', 'guildId', 'name', 'primaryRole', 'secondaryRoles', 'skills', 'canvas', 'createdAt'])
+        && data.keys().size() >= 8
+        && data.userId == request.auth.uid
+        && data.guildId is string && data.guildId.size() <= 50
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.primaryRole is string && data.primaryRole.size() <= 100
+        && data.secondaryRoles is list && data.secondaryRoles.size() <= 10
+        && (!('photoURL' in data) || data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 2000))
+        && (!('updatedAt' in data) || data.updatedAt is timestamp)
+        && (!('github' in data) || (data.github is string && data.github.size() <= 100))
+        && (!('linkedin' in data) || (data.linkedin is string && data.linkedin.size() <= 100))
+        && (!('roast' in data) || (data.roast is string && data.roast.size() <= 8000))
+        && (!('roastBrutal' in data) || (data.roastBrutal is string && data.roastBrutal.size() <= 8000))
+        && (!('roastMild' in data) || (data.roastMild is string && data.roastMild.size() <= 8000))
+        && data.skills is map
+        && data.skills.keys().hasAll(['frontend', 'backend', 'ux_ui', 'dados', 'hardware_android', 'vibe_coding'])
+        && data.skills.frontend is number && data.skills.backend is number 
+        && data.skills.ux_ui is number && data.skills.dados is number
+        && data.skills.hardware_android is number && data.skills.vibe_coding is number
+        && data.canvas is map
+        && data.canvas.keys().hasAll(['loves', 'comfort', 'veto'])
+        && data.canvas.loves is list && data.canvas.loves.size() <= 50
+        && data.canvas.comfort is list && data.canvas.comfort.size() <= 50
+        && data.canvas.veto is list && data.canvas.veto.size() <= 50;
+    }
+
+    function isValidProfile(data) {
+      return data.keys().hasAll(['userId', 'name', 'primaryRole', 'secondaryRoles', 'skills', 'canvas', 'createdAt', 'status', 'eventId'])
+        && data.keys().size() >= 9
+        && data.userId == request.auth.uid
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.primaryRole is string && data.primaryRole.size() <= 100
+        && data.secondaryRoles is list && data.secondaryRoles.size() <= 10
+        && (!('photoURL' in data) || data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 2000))
+        && (!('updatedAt' in data) || data.updatedAt is timestamp)
+        && (!('github' in data) || (data.github is string && data.github.size() <= 100))
+        && (!('linkedin' in data) || (data.linkedin is string && data.linkedin.size() <= 100))
+        && (!('bio' in data) || (data.bio is string && data.bio.size() <= 1000))
+        && data.status is string && (data.status == 'looking' || data.status == 'open' || data.status == 'complete')
+        && data.eventId is string && data.eventId.size() <= 50
+        && (!('squadId' in data) || data.squadId == null || (data.squadId is string && data.squadId.size() <= 100))
+        && (!('roast' in data) || (data.roast is string && data.roast.size() <= 8000))
+        && (!('roastBrutal' in data) || (data.roastBrutal is string && data.roastBrutal.size() <= 8000))
+        && (!('roastMild' in data) || (data.roastMild is string && data.roastMild.size() <= 8000))
+        && data.skills is map
+        && data.skills.keys().hasAll(['frontend', 'backend', 'ux_ui', 'dados', 'hardware_android', 'vibe_coding'])
+        && data.skills.frontend is number && data.skills.backend is number 
+        && data.skills.ux_ui is number && data.skills.dados is number
+        && data.skills.hardware_android is number && data.skills.vibe_coding is number
+        && data.canvas is map
+        && data.canvas.keys().hasAll(['loves', 'comfort', 'veto'])
+        && data.canvas.loves is list && data.canvas.loves.size() <= 50
+        && data.canvas.comfort is list && data.canvas.comfort.size() <= 50
+        && data.canvas.veto is list && data.canvas.veto.size() <= 50;
+    }
+
+    match /test/connection {
+      allow read: if true;
+    }
+
+    match /members/{memberId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && resource.data.guildId == 'TECH_FLORIPA_2026';
+      
+      allow create: if isSignedIn() 
+        && isValidId(memberId)
+        && memberId == request.auth.uid
+        && isValidMember(incoming())
+        && incoming().createdAt == request.time
+        && incoming().keys().hasOnly(['userId', 'guildId', 'name', 'photoURL', 'github', 'linkedin', 'primaryRole', 'secondaryRoles', 'skills', 'canvas', 'roast', 'roastBrutal', 'roastMild', 'createdAt', 'updatedAt']);
+
+      allow update: if isSignedIn()
+        && isValidId(memberId)
+        && isValidMember(incoming())
+        && incoming().userId == existing().userId
+        && incoming().guildId == existing().guildId
+        && incoming().createdAt == existing().createdAt
+        && (
+          (incoming().diff(existing()).affectedKeys().hasOnly(['skills', 'canvas', 'name', 'photoURL', 'github', 'linkedin', 'primaryRole', 'secondaryRoles', 'updatedAt', 'roast', 'roastBrutal', 'roastMild']))
+          ||
+          false
+        );
+        
+      allow delete: if isSignedIn() && isValidId(memberId) && existing().userId == request.auth.uid;
+    }
+
+    match /profiles/{profileId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      
+      allow create: if isSignedIn() 
+        && isValidId(profileId)
+        && profileId == request.auth.uid
+        && isValidProfile(incoming())
+        && incoming().createdAt == request.time
+        && incoming().keys().hasOnly(['userId', 'name', 'photoURL', 'github', 'linkedin', 'bio', 'primaryRole', 'secondaryRoles', 'skills', 'canvas', 'status', 'squadId', 'eventId', 'roast', 'roastBrutal', 'roastMild', 'createdAt', 'updatedAt']);
+
+      allow update: if isSignedIn()
+        && isValidId(profileId)
+        && isValidProfile(incoming())
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt
+        && (
+          (incoming().diff(existing()).affectedKeys().hasOnly(['skills', 'canvas', 'name', 'photoURL', 'github', 'linkedin', 'bio', 'primaryRole', 'secondaryRoles', 'status', 'squadId', 'eventId', 'updatedAt', 'roast', 'roastBrutal', 'roastMild']))
+          ||
+          false
+        );
+        
+      allow delete: if isSignedIn() && isValidId(profileId) && existing().userId == request.auth.uid;
+    }
+
+    function isValidPost(data) {
+      return data.keys().hasAll(['postId', 'likesCount'])
+        && data.postId is string && data.postId.size() <= 128
+        && data.likesCount is number;
+    }
+
+    function isValidLike(data) {
+      return data.keys().hasAll(['userId', 'createdAt'])
+        && data.userId == request.auth.uid
+        && data.createdAt == request.time;
+    }
+
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidPost(incoming());
+      allow update: if isSignedIn() 
+        && isValidPost(incoming())
+        && incoming().postId == existing().postId
+        && incoming().diff(existing()).affectedKeys().hasOnly(['likesCount', 'updatedAt']);
+    }
+
+    match /posts/{postId}/likes/{userId} {
+      allow read: if true;
+      allow create: if isSignedIn() && userId == request.auth.uid && isValidLike(incoming());
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+  }
+}
