@@ -7,6 +7,7 @@ import {
   getDoc
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { firestoreLog } from "../lib/logger";
 
 export async function toggleLike(postId: string, userId: string, isLiked: boolean) {
   const postRef = doc(db, "posts", postId);
@@ -41,7 +42,7 @@ export async function toggleLike(postId: string, userId: string, isLiked: boolea
     
     await batch.commit();
   } catch (error) {
-    console.error("Error toggling like:", error);
+    firestoreLog.error("Error toggling like:", error);
     throw error;
   }
 }

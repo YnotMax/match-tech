@@ -62,7 +62,7 @@ export default function Guilda() {
 
     const q = query(collection(db, "members"));
     const unsub = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
       
       // Sort so current user is always first
       data.sort((a, b) => {

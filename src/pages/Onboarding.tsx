@@ -9,6 +9,7 @@ import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis } from "recharts";
 import { X, Plus, Terminal, User, ShieldCheck, Github, Linkedin, Info, Heart, Check, Ban } from "lucide-react";
 import Avatar from "../components/ui/Avatar";
+import { firestoreLog } from "../lib/logger";
 
 const TAG_CATEGORIES = [
   {
@@ -144,7 +145,7 @@ export default function Onboarding() {
           }));
         }
       } catch (error) {
-        console.error("Erro ao buscar dados do membro:", error);
+        firestoreLog.error("Erro ao buscar dados do membro:", error);
       } finally {
         setInitializing(false);
       }
@@ -262,7 +263,7 @@ export default function Onboarding() {
       await setDoc(doc(db, "profiles", user.uid), profileData, { merge: true });
       navigate("/discover");
     } catch (err) {
-      console.error(err);
+      firestoreLog.error("Erro ao registrar perfil:", err);
       alert("Erro ao registrar perfil.");
     } finally {
       setLoading(false);
@@ -698,6 +699,10 @@ export default function Onboarding() {
                   )}
                 </div>
               </div>
+
+              {/* Spider Chart Section */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
                   <p className="text-[10px] font-black uppercase bg-neo-black text-white px-2">Análise de Campo</p>
                   <p className="text-[8px] font-mono opacity-50 uppercase">Vibe: {skills.vibe_coding}/10</p>
                 </div>
