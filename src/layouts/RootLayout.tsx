@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { Zap, User as UserIcon, Menu, X, LogOut } from "lucide-react";
+import { Zap, User as UserIcon, Menu, X, LogOut, Bug, Info } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function RootLayout() {
   const location = useLocation();
   const { user, logOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [triggerError, setTriggerError] = useState(false);
+
+  if (triggerError) {
+    throw new Error("Erro de depuração provocado intencionalmente via botão 'BUG' na barra inferior! 🐛");
+  }
 
   // Close menu on route change
   useEffect(() => {
@@ -28,7 +34,7 @@ export default function RootLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-neo-bg text-neo-black selection:bg-neo-lime selection:text-neo-black font-sans relative">
+    <div className="min-h-screen bg-neo-bg text-neo-black selection:bg-neo-lime selection:text-neo-black font-sans relative flex flex-col">
       <nav id="main-nav" className="border-b-[4px] border-neo-black bg-white sticky top-0 z-[40]">
         <div className="max-w-7xl mx-auto p-4 px-6">
           <div className="flex items-center justify-between">
@@ -67,7 +73,7 @@ export default function RootLayout() {
                     )}
                   </div>
                   <button
-                    onClick={logOut}
+                    onClick={() => setShowLogoutConfirm(true)}
                     className="px-3 py-2 font-heading font-bold text-xs uppercase bg-neo-pink text-white border-[3px] border-neo-black shadow-[3px_3px_0_0_#000] hover:-translate-y-1 hover:shadow-[5px_5px_0_0_#000] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all flex items-center gap-1.5"
                     title="Sair da conta"
                   >
@@ -121,7 +127,10 @@ export default function RootLayout() {
               })}
               {user && (
                 <button
-                  onClick={logOut}
+                  onClick={() => {
+                    setShowLogoutConfirm(true);
+                    setIsMobileMenuOpen(false);
+                  }}
                   className="px-4 py-3 font-heading font-bold text-lg uppercase text-center border-[3px] border-neo-black bg-neo-pink text-white shadow-[4px_4px_0_0_#000] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all flex items-center justify-center gap-2"
                 >
                   <LogOut className="w-5 h-5" />
@@ -144,6 +153,51 @@ export default function RootLayout() {
       <main className="w-full flex-1">
         <Outlet />
       </main>
+
+      {/* Easter Egg BUG button at the very corner of the screen */}
+      <button
+        onClick={() => setTriggerError(true)}
+        className="fixed bottom-3 right-3 z-50 px-2 py-1 text-[10px] font-mono font-bold uppercase bg-white/80 hover:bg-neo-pink hover:text-white text-neo-black/40 border border-neo-black/20 hover:border-neo-black shadow-[1px_1px_0_0_rgba(0,0,0,0.1)] hover:shadow-[2px_2px_0_0_#000] active:translate-y-[1px] active:translate-x-[1px] active:shadow-none transition-all"
+        title="Provocar erro para testar a tela de erro (Easter Egg)"
+      >
+        🐛 BUG
+      </button>
+
+      {/* Custom Neo-Brutalist Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-neo-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+          <div className="bg-white border-[4px] border-neo-black p-6 md:p-8 max-w-sm w-full shadow-[8px_8px_0_0_#000] relative animate-in zoom-in-95 duration-150">
+            {/* Accent block */}
+            <div className="absolute -top-4 -left-4 bg-neo-pink text-white border-[3px] border-neo-black px-3 py-1 font-heading font-black uppercase text-xs rotate-[-3deg] shadow-[3px_3px_0_0_#000]">
+              ALERTA DE SISTEMA ⚠️
+            </div>
+            
+            <h3 className="font-heading font-black text-2xl uppercase tracking-tighter text-neo-black mb-4 mt-2">
+              Você tem certeza que quer sair? 🥺
+            </h3>
+            <p className="font-bold text-sm text-neo-black/70 mb-6">
+              Sua sessão será encerrada e você precisará logar novamente para acessar seu perfil e sintonizar sua Sina.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  logOut();
+                  setShowLogoutConfirm(false);
+                }}
+                className="w-full py-3 bg-neo-pink text-white font-heading font-bold uppercase text-center border-[3px] border-neo-black shadow-[4px_4px_0_0_#000] hover:translate-y-[-2px] hover:shadow-[5px_5px_0_0_#000] active:translate-y-[1px] active:translate-x-[1px] active:shadow-none transition-all"
+              >
+                SIM, QUERO SAIR 😭
+              </button>
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="w-full py-3 bg-neo-lime text-neo-black font-heading font-bold uppercase text-center border-[3px] border-neo-black shadow-[4px_4px_0_0_#000] hover:translate-y-[-2px] hover:shadow-[5px_5px_0_0_#000] active:translate-y-[1px] active:translate-x-[1px] active:shadow-none transition-all"
+              >
+                NÃO, ME DEIXA AQUI! 🚀
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

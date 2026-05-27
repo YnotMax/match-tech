@@ -328,13 +328,18 @@ export default function Onboarding() {
               <div className="bg-neo-bg neo-border p-4 font-mono text-sm font-bold break-all">
                 {magicLinkEmail}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <p className="text-sm text-neo-black/70 font-bold">
                   Abra seu email e clique no link para entrar.
                 </p>
-                <p className="text-xs text-neo-black/50 font-bold">
-                  Não achou? Verifique a pasta de spam.
-                </p>
+                <div className="bg-neo-pink/10 text-neo-black border-[3px] border-neo-black p-4 text-left space-y-1.5 shadow-[3px_3px_0_0_#000] rotate-[-1deg]">
+                  <p className="font-heading font-black text-xs uppercase text-neo-pink flex items-center gap-1">
+                    ⚠️ ATENÇÃO: VERIFIQUE O SPAM!
+                  </p>
+                  <p className="text-xs font-bold leading-normal">
+                    Como o link é enviado de forma automática, a mensagem pode ir direto para o seu <span className="bg-neo-pink text-white px-1 font-black">SPAM ou Lixo Eletrônico</span>. Se não chegar em 1 minuto, procure lá!
+                  </p>
+                </div>
               </div>
 
               <div className="border-t-[3px] border-neo-black pt-6 space-y-3">
@@ -468,8 +473,26 @@ export default function Onboarding() {
               </Button>
             </form>
 
+            {/* Como Funciona o Acesso / Explicação Sutil */}
+            <div className="bg-neo-bg border-[3px] border-neo-black p-4 space-y-2 text-xs text-left shadow-[3px_3px_0_0_#000]">
+              <h4 className="font-heading font-black uppercase text-neo-black flex items-center gap-1.5">
+                <Info className="w-4.5 h-4.5 text-neo-cyan" /> COMO FUNCIONA O ACESSO?
+              </h4>
+              <ul className="list-disc pl-4 space-y-1 font-bold text-neo-black/75">
+                <li>
+                  <span className="text-neo-pink">Google:</span> Conexão instantânea de 1 clique.
+                </li>
+                <li>
+                  <span className="text-neo-cyan">Link Mágico:</span> Digite seu email, enviamos um link e você entra sem precisar lembrar de senhas.
+                </li>
+                <li className="text-neo-pink bg-neo-pink/10 px-1 py-0.5 rounded border border-neo-pink/20">
+                  ⚠️ <span className="underline">IMPORTANTE:</span> O link pode cair na pasta de <span className="underline">SPAM</span>. Verifique lá se atrasar!
+                </li>
+              </ul>
+            </div>
+
             {/* Footer decorativo */}
-            <div className="flex justify-center gap-4 opacity-50 pt-2">
+            <div className="flex justify-center gap-4 opacity-50 pt-1">
               <div className="w-2 h-2 bg-neo-black animate-bounce [animation-delay:-0.3s]"></div>
               <div className="w-2 h-2 bg-neo-black animate-bounce [animation-delay:-0.15s]"></div>
               <div className="w-2 h-2 bg-neo-black animate-bounce"></div>
