@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, db } from '../lib/firebase';
-import { User, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { User, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { authLog } from '../lib/logger';
 
 interface AuthContextType {
@@ -17,12 +17,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Captura resultado do redirect do Google Sign-In
-    getRedirectResult(auth).catch((err) => {
-      authLog.error('Erro no redirect de login:', err);
-    });
-
     const unsubscribe = auth.onAuthStateChanged((u) => {
+      authLog.info('Estado de autenticação mudou:', u?.email ?? 'não autenticado');
       setUser(u);
       setLoading(false);
     });
@@ -31,7 +27,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithRedirect(auth, provider);
+    try {
+      await signInWithPopup(auth, provider);
+      authLog.info('Login via Google realizado com sucesso (popup).');
+    } catch (err) {
+      authLog.error('Erro no login via popup do Google:', err);
+      throw err;
+    }
   };
 
   const logOut = async () => {
