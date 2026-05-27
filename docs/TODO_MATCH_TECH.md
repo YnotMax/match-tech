@@ -164,7 +164,7 @@
 - [x] **Fix IA (Modelo Gemini):** Trocar `gemini-1.5-flash` (descontinuado) → `gemini-2.5-flash` em `server.ts`.
 - [x] **Página de Erro Personalizada:** `ErrorBoundary.tsx` reescrito com estilo Neo-Brutalista e mensagem divertida.
 - [x] **Logger unificado:** Substituir `console.error/log` por loggers estilizados (`authLog`, `firestoreLog`, `serverLog`, etc) em todos os arquivos.
-- [ ] **Magic Link Login:** Firebase `sendSignInLinkToEmail` como alternativa ao Google OAuth. *(Pós-sábado)*
+- [x] **Magic Link Login:** Firebase `sendSignInLinkToEmail` + `isSignInWithEmailLink` + `signInWithEmailLink` implementado como segunda opção ao Google OAuth. Tela de login redesenhada com 3 estados visuais (login, link enviado, validando link).
 
 ---
 
@@ -191,7 +191,8 @@
 | 07/05/2026 | MDs reescritos (v2) — Neo-Brutalismo real. Novo repo `match-tec` no GitHub criado. | Iniciar Fase 1. |
 | 07/05/2026 | **FASE 1 CONCLUÍDA:** Landing Page, novo navbar MATCH_TECH, remoção de 6 arquivos obsoletos, Guilda aberta para todos. | Onboarding (ajuste textos) + Fase 2. |
 | 25/05/2026 | Logger unificado com cores por módulo. Merge develop → main. | Hotfixes para versão mínima. |
-| 27/05/2026 | **FASE 0.5 Sprint:** Fix login Google (popup), botão SAIR, fix modelo IA (gemini-2.5-flash), página de erro Neo-Brutalista, `.env` configurado localmente. | Testar "Ler Minha Sina" local, merge → main, deploy Vercel. |
+| 27/05/2026 | **FASE 0.5 Sprint:** Fix login Google (popup), botão SAIR, fix modelo IA (gemini-2.5-flash), página de erro Neo-Brutalista, `.env` configurado localmente. | Magic Link Login. |
+| 27/05/2026 | **Magic Link Login:** AuthContext reescrito com 2 métodos (Google + Email). Tela de login redesenhada Neo-Brutalista com 3 estados visuais. | Testar Magic Link, commit, merge → main, deploy Vercel. |
 
 ---
 

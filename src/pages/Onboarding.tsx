@@ -58,9 +58,12 @@ const ROLES_LIST = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const { user, signIn } = useAuth();
+  const { user, signIn, sendMagicLink, magicLinkSent, magicLinkEmail, completingMagicLink, resetMagicLinkState } = useAuth();
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
+  const [magicEmail, setMagicEmail] = useState('');
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
+  const [magicLinkError, setMagicLinkError] = useState<string | null>(null);
 
   // Skills State
   const [skills, setSkills] = useState({
@@ -271,52 +274,209 @@ export default function Onboarding() {
   };
 
   if (!user) {
+    // Estado: Completando login via Magic Link (usuário acabou de clicar no link do email)
+    if (completingMagicLink) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-6 bg-neo-bg relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#000_2px,transparent_2px)] [background-size:24px_24px]"></div>
+          <Card variant="white" padding="none" className="max-w-md w-full border-8 border-neo-black overflow-hidden shadow-[20px_20px_0_0_#000] relative z-10">
+            <div className="bg-neo-black p-8 text-center space-y-6">
+              <div className="bg-neo-lime text-neo-black p-6 inline-block rounded-full neo-border border-4 animate-pulse">
+                <Terminal className="w-16 h-16" />
+              </div>
+              <h1 className="text-3xl font-heading text-white uppercase tracking-tighter leading-none">VALIDANDO LINK_</h1>
+            </div>
+            <div className="p-10 text-center space-y-6 bg-white">
+              <div className="flex justify-center gap-4">
+                <div className="w-3 h-3 bg-neo-lime animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-3 h-3 bg-neo-pink animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-3 h-3 bg-neo-cyan animate-bounce"></div>
+              </div>
+              <p className="font-black uppercase text-sm text-neo-black/70">
+                Completando seu login via Magic Link...
+              </p>
+              <div className="font-mono text-[9px] opacity-40 uppercase tracking-widest">
+                Decifrando credenciais criptografadas...
+              </div>
+            </div>
+          </Card>
+        </div>
+      );
+    }
+
+    // Estado: Magic Link enviado com sucesso — aguardando usuário abrir email
+    if (magicLinkSent) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-6 bg-neo-bg relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#000_2px,transparent_2px)] [background-size:24px_24px]"></div>
+          <motion.div
+            animate={{ x: [20, -20, 20], y: [20, -20, 20] }}
+            transition={{ duration: 25, repeat: Infinity }}
+            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-neo-lime/20 rounded-full blur-3xl"
+          />
+          <Card variant="white" padding="none" className="max-w-md w-full border-8 border-neo-black overflow-hidden shadow-[20px_20px_0_0_#000] relative z-10">
+            <div className="bg-neo-lime p-8 text-center space-y-4 border-b-[4px] border-neo-black">
+              <div className="bg-white text-neo-black p-5 inline-block rounded-full neo-border border-4">
+                <span className="text-5xl">📧</span>
+              </div>
+              <h1 className="text-3xl font-heading text-neo-black uppercase tracking-tighter leading-none">LINK ENVIADO_</h1>
+            </div>
+            <div className="p-8 text-center space-y-6 bg-white">
+              <p className="font-bold text-base">
+                Mandamos um link mágico para:
+              </p>
+              <div className="bg-neo-bg neo-border p-4 font-mono text-sm font-bold break-all">
+                {magicLinkEmail}
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-neo-black/70 font-bold">
+                  Abra seu email e clique no link para entrar.
+                </p>
+                <p className="text-xs text-neo-black/50 font-bold">
+                  Não achou? Verifique a pasta de spam.
+                </p>
+              </div>
+
+              <div className="border-t-[3px] border-neo-black pt-6 space-y-3">
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  className="w-full"
+                  onClick={async () => {
+                    if (magicLinkEmail) {
+                      setMagicLinkLoading(true);
+                      try {
+                        await sendMagicLink(magicLinkEmail);
+                      } catch {
+                        // erro já logado
+                      } finally {
+                        setMagicLinkLoading(false);
+                      }
+                    }
+                  }}
+                  disabled={magicLinkLoading}
+                >
+                  {magicLinkLoading ? 'REENVIANDO...' : 'REENVIAR LINK'}
+                </Button>
+                <button
+                  onClick={resetMagicLinkState}
+                  className="text-neo-pink font-heading font-bold text-sm uppercase underline underline-offset-4 hover:text-neo-black transition-colors"
+                >
+                  ← VOLTAR E USAR OUTRO MÉTODO
+                </button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      );
+    }
+
+    // Estado: Tela de login principal — duas opções (Google + Magic Link)
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-neo-bg relative overflow-hidden">
         {/* Decorative Background for Login */}
         <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#000_2px,transparent_2px)] [background-size:24px_24px]"></div>
-        <motion.div 
-          animate={{ x: [-20, 20, -20], y: [-20, 20, -20] }} 
+        <motion.div
+          animate={{ x: [-20, 20, -20], y: [-20, 20, -20] }}
           transition={{ duration: 20, repeat: Infinity }}
-          className="absolute top-1/4 left-1/4 w-64 h-64 bg-neo-pink/20 rounded-full blur-3xl" 
+          className="absolute top-1/4 left-1/4 w-64 h-64 bg-neo-pink/20 rounded-full blur-3xl"
         />
-        <motion.div 
-          animate={{ x: [20, -20, 20], y: [20, -20, 20] }} 
+        <motion.div
+          animate={{ x: [20, -20, 20], y: [20, -20, 20] }}
           transition={{ duration: 25, repeat: Infinity }}
-          className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-neo-lime/20 rounded-full blur-3xl" 
+          className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-neo-lime/20 rounded-full blur-3xl"
         />
 
         <Card variant="white" padding="none" className="max-w-md w-full border-8 border-neo-black overflow-hidden shadow-[20px_20px_0_0_#000] relative z-10">
+          {/* Header */}
           <div className="bg-neo-black p-8 text-center space-y-6">
             <div className="bg-neo-lime text-neo-black p-6 inline-block rounded-full neo-border border-4">
               <ShieldCheck className="w-16 h-16" />
             </div>
             <h1 className="text-4xl font-heading text-white uppercase tracking-tighter leading-none">ACESSO_RESTRITO</h1>
           </div>
-          
-          <div className="p-10 text-center space-y-8 bg-white">
-            <p className="font-black uppercase text-sm leading-relaxed text-neo-black/70">
+
+          <div className="p-8 space-y-6 bg-white">
+            <p className="font-black uppercase text-sm leading-relaxed text-neo-black/70 text-center">
               O Protocolo de Segurança Tech Floripa exige autenticação de nível 1 antes do mapeamento de arsenal. Conecte sua identidade para prosseguir.
             </p>
-            
-            <Button 
-              onClick={signIn} 
-              variant="primary" 
-              size="xl" 
-              className="w-full text-xl relative overflow-hidden"
+
+            {/* OPÇÃO 1: Google */}
+            <Button
+              onClick={signIn}
+              variant="primary"
+              size="xl"
+              className="w-full text-lg relative overflow-hidden"
               disabled={loading}
             >
-              {loading ? "VALIDANDO..." : "AUTENTICAR VIA GOOGLE"}
+              {loading ? 'VALIDANDO...' : 'AUTENTICAR VIA GOOGLE'}
             </Button>
 
-            <div className="flex justify-center gap-4 opacity-50">
+            {/* Separador */}
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-[3px] bg-neo-black"></div>
+              <span className="font-heading font-black text-sm uppercase text-neo-black/50">OU</span>
+              <div className="flex-1 h-[3px] bg-neo-black"></div>
+            </div>
+
+            {/* OPÇÃO 2: Magic Link */}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const email = magicEmail.trim();
+                if (!email) {
+                  setMagicLinkError('Digite seu email.');
+                  return;
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                  setMagicLinkError('Email inválido.');
+                  return;
+                }
+                setMagicLinkError(null);
+                setMagicLinkLoading(true);
+                try {
+                  await sendMagicLink(email);
+                } catch (err: any) {
+                  setMagicLinkError(err?.message || 'Erro ao enviar link. Tente novamente.');
+                } finally {
+                  setMagicLinkLoading(false);
+                }
+              }}
+              className="space-y-3"
+            >
+              <label className="font-heading font-bold text-xs uppercase tracking-wider text-neo-black/60 block">
+                Login via Link Mágico
+              </label>
+              <input
+                type="email"
+                value={magicEmail}
+                onChange={(e) => { setMagicEmail(e.target.value); setMagicLinkError(null); }}
+                placeholder="seu@email.com"
+                className="w-full px-4 py-3 bg-neo-bg font-mono font-bold text-sm border-[3px] border-neo-black shadow-[4px_4px_0_0_#000] focus:shadow-[6px_6px_0_0_#B8FF29] focus:outline-none transition-shadow placeholder:text-neo-black/30"
+              />
+              {magicLinkError && (
+                <p className="text-neo-pink font-bold text-xs uppercase">{magicLinkError}</p>
+              )}
+              <Button
+                type="submit"
+                variant="accent-cyan"
+                size="lg"
+                className="w-full"
+                disabled={magicLinkLoading}
+              >
+                {magicLinkLoading ? 'ENVIANDO...' : 'ENVIAR LINK MÁGICO ✉️'}
+              </Button>
+            </form>
+
+            {/* Footer decorativo */}
+            <div className="flex justify-center gap-4 opacity-50 pt-2">
               <div className="w-2 h-2 bg-neo-black animate-bounce [animation-delay:-0.3s]"></div>
               <div className="w-2 h-2 bg-neo-black animate-bounce [animation-delay:-0.15s]"></div>
               <div className="w-2 h-2 bg-neo-black animate-bounce"></div>
             </div>
-            
-            <div className="font-mono text-[9px] opacity-40 uppercase tracking-widest">
-              Aguardando validação de credenciais de membro...
+
+            <div className="font-mono text-[9px] opacity-40 uppercase tracking-widest text-center">
+              Escolha seu protocolo de autenticação...
             </div>
           </div>
         </Card>
