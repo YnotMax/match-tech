@@ -6,6 +6,13 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// Logger simples para o servidor (não usa o logger do frontend)
+const serverLog = {
+  info: (msg: string, data?: any) => console.log(`ℹ️ [Server] ${msg}`, data ?? ''),
+  error: (msg: string, data?: any) => console.error(`❌ [Server] ${msg}`, data ?? ''),
+  warn: (msg: string, data?: any) => console.warn(`⚠️ [Server] ${msg}`, data ?? ''),
+};
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -35,7 +42,7 @@ async function startServer() {
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         contents: `Analise este membro. DADOS DO MEMBRO: \n${JSON.stringify(memberData, null, 2)}`,
         config: {
           systemInstruction
@@ -58,7 +65,7 @@ async function startServer() {
 
       res.json({ roast: roastText });
     } catch (e: any) {
-      console.error(e);
+      serverLog.error('Erro na rota /api/roast:', e.message);
       const errorMessage = e.message?.includes('API key not valid') 
         ? "Chave da API do Gemini inválida ou não configurada. Por favor, adicione uma chave válida no painel de configurações."
         : e.message;
@@ -74,7 +81,7 @@ async function startServer() {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       
       const response = await ai.models.generateContent({ 
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         contents: `Contexto do Hackathon Tech Floripa:\n${challengeDesc}\n\nMembros da Equipe:\n${JSON.stringify(members, null, 2)}`,
         config: { 
           responseMimeType: "application/json",
@@ -105,11 +112,11 @@ Responda OBRIGATORIAMENTE em JSON no formato:
         }
         res.json(parsed);
       } catch (parseError) {
-        console.error("AI JSON Parse Error:", responseText);
+        serverLog.error('AI JSON Parse Error:', responseText);
         res.status(500).json({ error: "O Oráculo alucinou um formato inválido. Tente novamente." });
       }
     } catch (e: any) {
-      console.error(e);
+      serverLog.error('Erro na rota /api/oraculo/match:', e.message);
       const errorMessage = e.message?.includes('API key not valid') 
         ? "Chave da API do Gemini inválida ou não configurada. Por favor, adicione uma chave válida no painel de configurações."
         : e.message;

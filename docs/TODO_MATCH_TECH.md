@@ -155,6 +155,22 @@
 
 ---
 
+## FASE 0.5: 🔧 Hotfixes & Quick Wins (Sprint Sábado)
+
+> **Objetivo:** Versão mínima funcional para divulgar no Python Floripa.
+
+- [x] **Login Google:** Trocar `signInWithRedirect` → `signInWithPopup` (corrige tela branca no localhost e Vercel).
+- [x] **Botão de SAIR:** Adicionado no navbar (desktop + mobile) com estilo Neo-Brutalista `bg-neo-pink`.
+- [x] **Fix IA (Modelo Gemini):** Trocar `gemini-1.5-flash` (descontinuado) → `gemini-2.5-flash` em `server.ts`.
+- [x] **Página de Erro Personalizada & Animada:** `ErrorBoundary.tsx` reescrito com estilo Neo-Brutalista, mensagem divertida e animações fluidas incríveis com Framer Motion (efeito spring no card, formas flutuantes de background, wobbling nos cantos decorativos e micro-interações táteis).
+- [x] **Logger unificado:** Substituir `console.error/log` por loggers estilizados (`authLog`, `firestoreLog`, `serverLog`, etc) em todos os arquivos.
+- [x] **Magic Link Login:** Firebase `sendSignInLinkToEmail` + `isSignInWithEmailLink` + `signInWithEmailLink` implementado como segunda opção ao Google OAuth. Tela de login redesenhada com 3 estados visuais (login, link enviado, validando link).
+- [x] **Aviso de Spam e Explicação de Acesso:** Adicionado box explicativo sobre os métodos de login e alerta proeminente para verificar a pasta de SPAM (evitando frustrações quando o email atrasar).
+- [x] **Confirmação de Saída Personalizada:** Modal de confirmação Neo-Brutalist ao clicar em "SAIR", garantindo segurança e melhorando a usabilidade.
+- [x] **Simulação de Bug (Easter Egg):** Botão discreto "BUG" fixado no cantinho inferior da tela como um easter egg para forçar erro de renderização e testar a tela de erro (ErrorBoundary) sem atrapalhar a navegação ou poluir o visual.
+
+---
+
 ## DECISÕES PENDENTES
 
 | # | Decisão | Opções | Status |
@@ -163,7 +179,9 @@
 | 2 | Navegação | Manter top nav atual | **Confirmado** |
 | 3 | Multi-evento | Só Tech Floripa 2026 ou genérico? | **Começar com um** |
 | 4 | Firebase config | Manter o projeto atual | **Confirmado** |
-| 5 | Deploy | Vercel? Firebase Hosting? | **Pendente** |
+| 5 | Deploy | Vercel? Firebase Hosting? | **Vercel (confirmado)** |
+| 6 | Modelo IA | gemini-1.5-flash / 2.5-flash / 3.5-flash | **gemini-2.5-flash (confirmado)** |
+| 7 | Login alternativo | Google Only vs Magic Link | **Google (por enquanto), Magic Link (pós-sábado)** |
 
 ---
 
@@ -175,6 +193,11 @@
 | 07/05/2026 | Outro chat tentou Fase 1 com visual dark. Tony reverteu. | Reescrever MDs. |
 | 07/05/2026 | MDs reescritos (v2) — Neo-Brutalismo real. Novo repo `match-tec` no GitHub criado. | Iniciar Fase 1. |
 | 07/05/2026 | **FASE 1 CONCLUÍDA:** Landing Page, novo navbar MATCH_TECH, remoção de 6 arquivos obsoletos, Guilda aberta para todos. | Onboarding (ajuste textos) + Fase 2. |
+| 25/05/2026 | Logger unificado com cores por módulo. Merge develop → main. | Hotfixes para versão mínima. |
+| 27/05/2026 | **FASE 0.5 Sprint:** Fix login Google (popup), botão SAIR, fix modelo IA (gemini-2.5-flash), página de erro Neo-Brutalista, `.env` configurado localmente. | Magic Link Login. |
+| 27/05/2026 | **Magic Link Login:** AuthContext reescrito com 2 métodos (Google + Email). Tela de login redesenhada Neo-Brutalista com 3 estados visuais. | Testar Magic Link, commit, merge → main, deploy Vercel. |
+| 27/05/2026 | **Melhorias de Acesso & UI:** Alerta de spam proeminente, explicação de login sutil, confirmação de logout em modal Neo-Brutalist e botão BUG fixado discretamente como easter egg. | Implementar animações premium na tela de erro. |
+| 27/05/2026 | **Animações na Página de Erro:** Adicionado Framer Motion na ErrorBoundary para criar efeitos fluidos, partículas flutuantes ao fundo, wobbling e micro-interações. | Tudo pronto e com 0 erros de compilação! |
 
 ---
 
