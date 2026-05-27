@@ -155,6 +155,19 @@
 
 ---
 
+## FASE 0.5: 🔧 Hotfixes & Quick Wins (Sprint Sábado)
+
+> **Objetivo:** Versão mínima funcional para divulgar no Python Floripa.
+
+- [x] **Login Google:** Trocar `signInWithRedirect` → `signInWithPopup` (corrige tela branca no localhost e Vercel).
+- [x] **Botão de SAIR:** Adicionado no navbar (desktop + mobile) com estilo Neo-Brutalista `bg-neo-pink`.
+- [x] **Fix IA (Modelo Gemini):** Trocar `gemini-1.5-flash` (descontinuado) → `gemini-2.5-flash` em `server.ts`.
+- [x] **Página de Erro Personalizada:** `ErrorBoundary.tsx` reescrito com estilo Neo-Brutalista e mensagem divertida.
+- [x] **Logger unificado:** Substituir `console.error/log` por loggers estilizados (`authLog`, `firestoreLog`, `serverLog`, etc) em todos os arquivos.
+- [ ] **Magic Link Login:** Firebase `sendSignInLinkToEmail` como alternativa ao Google OAuth. *(Pós-sábado)*
+
+---
+
 ## DECISÕES PENDENTES
 
 | # | Decisão | Opções | Status |
@@ -163,7 +176,9 @@
 | 2 | Navegação | Manter top nav atual | **Confirmado** |
 | 3 | Multi-evento | Só Tech Floripa 2026 ou genérico? | **Começar com um** |
 | 4 | Firebase config | Manter o projeto atual | **Confirmado** |
-| 5 | Deploy | Vercel? Firebase Hosting? | **Pendente** |
+| 5 | Deploy | Vercel? Firebase Hosting? | **Vercel (confirmado)** |
+| 6 | Modelo IA | gemini-1.5-flash / 2.5-flash / 3.5-flash | **gemini-2.5-flash (confirmado)** |
+| 7 | Login alternativo | Google Only vs Magic Link | **Google (por enquanto), Magic Link (pós-sábado)** |
 
 ---
 
@@ -175,6 +190,8 @@
 | 07/05/2026 | Outro chat tentou Fase 1 com visual dark. Tony reverteu. | Reescrever MDs. |
 | 07/05/2026 | MDs reescritos (v2) — Neo-Brutalismo real. Novo repo `match-tec` no GitHub criado. | Iniciar Fase 1. |
 | 07/05/2026 | **FASE 1 CONCLUÍDA:** Landing Page, novo navbar MATCH_TECH, remoção de 6 arquivos obsoletos, Guilda aberta para todos. | Onboarding (ajuste textos) + Fase 2. |
+| 25/05/2026 | Logger unificado com cores por módulo. Merge develop → main. | Hotfixes para versão mínima. |
+| 27/05/2026 | **FASE 0.5 Sprint:** Fix login Google (popup), botão SAIR, fix modelo IA (gemini-2.5-flash), página de erro Neo-Brutalista, `.env` configurado localmente. | Testar "Ler Minha Sina" local, merge → main, deploy Vercel. |
 
 ---
 

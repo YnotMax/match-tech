@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { Zap, User as UserIcon, Menu, X } from "lucide-react";
+import { Zap, User as UserIcon, Menu, X, LogOut } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function RootLayout() {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Close menu on route change
@@ -58,13 +58,23 @@ export default function RootLayout() {
               })}
               
               {user && (
-                <div className="ml-2 flex items-center justify-center w-10 h-10 rounded-full neo-border border-2 bg-white overflow-hidden shadow-[2px_2px_0_0_#000]">
-                  {user.photoURL ? (
-                    <img src={getHighResPhotoUrl(user.photoURL) || ""} alt={user.displayName || "User"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    <UserIcon className="w-6 h-6 text-neo-black" />
-                  )}
-                </div>
+                <>
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full neo-border border-2 bg-white overflow-hidden shadow-[2px_2px_0_0_#000]">
+                    {user.photoURL ? (
+                      <img src={getHighResPhotoUrl(user.photoURL) || ""} alt={user.displayName || "User"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    ) : (
+                      <UserIcon className="w-6 h-6 text-neo-black" />
+                    )}
+                  </div>
+                  <button
+                    onClick={logOut}
+                    className="px-3 py-2 font-heading font-bold text-xs uppercase bg-neo-pink text-white border-[3px] border-neo-black shadow-[3px_3px_0_0_#000] hover:-translate-y-1 hover:shadow-[5px_5px_0_0_#000] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all flex items-center gap-1.5"
+                    title="Sair da conta"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    SAIR
+                  </button>
+                </>
               )}
             </div>
 
@@ -109,6 +119,15 @@ export default function RootLayout() {
                   </NavLink>
                 );
               })}
+              {user && (
+                <button
+                  onClick={logOut}
+                  className="px-4 py-3 font-heading font-bold text-lg uppercase text-center border-[3px] border-neo-black bg-neo-pink text-white shadow-[4px_4px_0_0_#000] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all flex items-center justify-center gap-2"
+                >
+                  <LogOut className="w-5 h-5" />
+                  SAIR
+                </button>
+              )}
             </div>
           )}
         </div>
