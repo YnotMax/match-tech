@@ -168,6 +168,7 @@
 - [x] **Aviso de Spam e Explicação de Acesso:** Adicionado box explicativo sobre os métodos de login e alerta proeminente para verificar a pasta de SPAM (evitando frustrações quando o email atrasar).
 - [x] **Confirmação de Saída Personalizada:** Modal de confirmação Neo-Brutalist ao clicar em "SAIR", garantindo segurança e melhorando a usabilidade.
 - [x] **Simulação de Bug (Easter Egg):** Botão discreto "BUG" fixado no cantinho inferior da tela como um easter egg para forçar erro de renderização e testar a tela de erro (ErrorBoundary) sem atrapalhar a navegação ou poluir o visual.
+- [x] **Correção de Vazamento de Credenciais:** Removido `firebase-applet-config.json` do rastreamento do Git, migrado as chaves de configuração pública do Firebase para o arquivo `.env` (seguro e ignorado por padrão) com o prefixo `VITE_` para consumo seguro do lado do cliente, e adicionado o arquivo de configuração no `.gitignore` para eliminar permanentemente o alerta de segurança do GitHub.
 
 ---
 
@@ -198,6 +199,7 @@
 | 27/05/2026 | **Magic Link Login:** AuthContext reescrito com 2 métodos (Google + Email). Tela de login redesenhada Neo-Brutalista com 3 estados visuais. | Testar Magic Link, commit, merge → main, deploy Vercel. |
 | 27/05/2026 | **Melhorias de Acesso & UI:** Alerta de spam proeminente, explicação de login sutil, confirmação de logout em modal Neo-Brutalist e botão BUG fixado discretamente como easter egg. | Implementar animações premium na tela de erro. |
 | 27/05/2026 | **Animações na Página de Erro:** Adicionado Framer Motion na ErrorBoundary para criar efeitos fluidos, partículas flutuantes ao fundo, wobbling e micro-interações. | Tudo pronto e com 0 erros de compilação! |
+| 29/05/2026 | **Hotfix de Segurança:** Removido `firebase-applet-config.json` do rastreamento do Git, migrado credenciais para `.env` com prefixo `VITE_` e adicionado o JSON no `.gitignore` para sanar alerta de vazamento do GitHub. | Segurança restabelecida com 0 erros TypeScript! |
 
 ---
 
