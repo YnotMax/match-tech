@@ -21,6 +21,8 @@ interface AuthContextType {
   magicLinkEmail: string | null;
   completingMagicLink: boolean;
   resetMagicLinkState: () => void;
+  pendingMagicLinkUrl: string | null;
+  confirmMagicLinkEmail: (email: string) => Promise<void>;
 }
 
 const MAGIC_EMAIL_KEY = 'matchtech_magic_email';
@@ -33,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState<string | null>(null);
   const [completingMagicLink, setCompletingMagicLink] = useState(false);
+  const [pendingMagicLinkUrl, setPendingMagicLinkUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // Detecta se a URL atual é um Magic Link de login
@@ -41,19 +44,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       authLog.info('Magic Link detectado na URL. Completando login...');
 
       // Recupera o email salvo no localStorage (mesmo dispositivo)
-      let email = window.localStorage.getItem(MAGIC_EMAIL_KEY);
+      const savedEmail = window.localStorage.getItem(MAGIC_EMAIL_KEY);
 
-      // Se o usuário abriu o link em outro dispositivo, pede o email
-      if (!email) {
-        email = window.prompt('Por favor, confirme seu email para completar o login:');
-      }
-
-      if (email) {
-        signInWithEmailLink(auth, email, window.location.href)
+      if (savedEmail) {
+        // Mesmo dispositivo: completa imediatamente
+        signInWithEmailLink(auth, savedEmail, window.location.href)
           .then(() => {
             authLog.info('Login via Magic Link realizado com sucesso.');
             window.localStorage.removeItem(MAGIC_EMAIL_KEY);
-            // Limpa os parâmetros do link da URL sem recarregar
             window.history.replaceState(null, '', window.location.pathname);
           })
           .catch((err) => {
@@ -63,7 +61,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setCompletingMagicLink(false);
           });
       } else {
-        authLog.warn('Magic Link: email não fornecido pelo usuário.');
+        // Dispositivo diferente: armazena a URL e pede email via UI própria
+        authLog.warn('Magic Link: email não encontrado no dispositivo. Aguardando confirmação via UI.');
+        setPendingMagicLinkUrl(window.location.href);
+        window.history.replaceState(null, '', window.location.pathname);
         setCompletingMagicLink(false);
       }
     }
@@ -121,6 +122,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     authLog.info('Usuário fez logout.');
   };
 
+  // Confirma email para login em dispositivo diferente (substitui window.prompt)
+  const confirmMagicLinkEmail = async (email: string) => {
+    if (!pendingMagicLinkUrl) return;
+    setCompletingMagicLink(true);
+    try {
+      await signInWithEmailLink(auth, email, pendingMagicLinkUrl);
+      authLog.info('Login via Magic Link (cross-device) realizado com sucesso.');
+      setPendingMagicLinkUrl(null);
+    } catch (err) {
+      authLog.error('Erro ao confirmar Magic Link (cross-device):', err);
+      throw err;
+    } finally {
+      setCompletingMagicLink(false);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -131,7 +148,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       magicLinkSent,
       magicLinkEmail,
       completingMagicLink,
-      resetMagicLinkState
+      resetMagicLinkState,
+      pendingMagicLinkUrl,
+      confirmMagicLinkEmail,
     }}>
       {children}
     </AuthContext.Provider>

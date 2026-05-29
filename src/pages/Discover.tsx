@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import Avatar from "../components/ui/Avatar";
 import TagBadge from "../components/ui/TagBadge";
 import ProfileCard from "../components/ui/ProfileCard";
-import { FileWarning, Skull, Terminal, Zap, Github, Linkedin, Search, Filter } from "lucide-react";
+import { FileWarning, Skull, Terminal, Zap, Github, Linkedin, Search, Filter, AlertTriangle, X as XIcon } from "lucide-react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
 import { db } from "../lib/firebase";
 import { collection, onSnapshot, query, updateDoc, doc } from "firebase/firestore";
@@ -28,6 +28,13 @@ export default function Discover() {
   const [roastStep, setRoastStep] = useState<'selecting' | 'loading' | null>(null);
   const [roastLogs, setRoastLogs] = useState<string[]>([]);
   const [activePersonaView, setActivePersonaView] = useState<'brutal' | 'mild' | null>(null);
+
+  // Toast notification state
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'info' } | null>(null);
+  const showToast = useCallback((message: string, type: 'error' | 'info' = 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5000);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -157,11 +164,11 @@ export default function Discover() {
         }
         setSelectedProfile({ ...m, ...updateData });
       } else {
-        alert("Erro no backend: " + JSON.stringify(data));
+        showToast(`Erro ao gerar a Sina: ${data.error || 'Resposta inesperada do servidor.'}`);
       }
     } catch (e: any) {
       apiLog.error("Erro ao chamar o roast:", e);
-      alert("Erro ao chamar o roast.");
+      showToast("Sem conexão com o servidor de IA. Verifique sua rede e tente novamente.");
     } finally {
       clearInterval(interval);
       setRoastStep(null);
@@ -205,6 +212,25 @@ export default function Discover() {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-7xl mx-auto py-12 px-6"
     >
+      {/* Neo-Brutalist Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            key="toast"
+            initial={{ x: 80, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 80, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+            className="fixed top-24 right-4 z-[9999] max-w-sm w-full flex items-start gap-3 bg-neo-pink text-white border-[3px] border-neo-black shadow-[6px_6px_0_0_#000] p-4"
+          >
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <p className="font-bold text-sm flex-1 leading-snug">{toast.message}</p>
+            <button onClick={() => setToast(null)} className="shrink-0 hover:opacity-70 transition-opacity">
+              <XIcon className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Page Header */}
       <div className="mb-12 border-b-[6px] border-neo-black pb-8 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
         <div>

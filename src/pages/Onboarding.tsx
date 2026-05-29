@@ -58,9 +58,10 @@ const ROLES_LIST = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const { user, signIn, sendMagicLink, magicLinkSent, magicLinkEmail, completingMagicLink, resetMagicLinkState } = useAuth();
+  const { user, signIn, sendMagicLink, magicLinkSent, magicLinkEmail, completingMagicLink, resetMagicLinkState, pendingMagicLinkUrl, confirmMagicLinkEmail } = useAuth();
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [magicEmail, setMagicEmail] = useState('');
   const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [magicLinkError, setMagicLinkError] = useState<string | null>(null);
@@ -267,7 +268,8 @@ export default function Onboarding() {
       navigate("/discover");
     } catch (err) {
       firestoreLog.error("Erro ao registrar perfil:", err);
-      alert("Erro ao registrar perfil.");
+      setSubmitError("Erro ao salvar perfil. Verifique sua conexão e tente novamente.");
+      setTimeout(() => setSubmitError(null), 6000);
     } finally {
       setLoading(false);
     }
@@ -298,6 +300,69 @@ export default function Onboarding() {
               <div className="font-mono text-[9px] opacity-40 uppercase tracking-widest">
                 Decifrando credenciais criptografadas...
               </div>
+            </div>
+          </Card>
+        </div>
+      );
+    }
+
+    // Estado: Abriu o link em outro dispositivo — pede email via UI própria
+    if (pendingMagicLinkUrl) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-6 bg-neo-bg relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#000_2px,transparent_2px)] [background-size:24px_24px]"></div>
+          <Card variant="white" padding="none" className="max-w-md w-full border-8 border-neo-black overflow-hidden shadow-[20px_20px_0_0_#000] relative z-10">
+            <div className="bg-neo-cyan p-8 text-center space-y-4 border-b-[4px] border-neo-black">
+              <div className="bg-white text-neo-black p-5 inline-block rounded-full neo-border border-4">
+                <span className="text-5xl">📱</span>
+              </div>
+              <h1 className="text-3xl font-heading text-neo-black uppercase tracking-tighter leading-none">NOVO DISPOSITIVO_</h1>
+            </div>
+            <div className="p-8 space-y-5 bg-white">
+              <p className="font-bold text-sm text-neo-black/70">
+                Parece que você abriu o link em um dispositivo diferente. Para sua segurança, confirme seu email para concluir o login.
+              </p>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!magicEmail.trim()) return;
+                  setMagicLinkLoading(true);
+                  setMagicLinkError(null);
+                  try {
+                    await confirmMagicLinkEmail(magicEmail.trim());
+                  } catch {
+                    setMagicLinkError('Email inválido ou link expirado. Solicite um novo link.');
+                  } finally {
+                    setMagicLinkLoading(false);
+                  }
+                }}
+                className="space-y-3"
+              >
+                <input
+                  type="email"
+                  value={magicEmail}
+                  onChange={(e) => { setMagicEmail(e.target.value); setMagicLinkError(null); }}
+                  placeholder="seu@email.com"
+                  className="w-full px-4 py-3 bg-neo-bg font-mono font-bold text-sm border-[3px] border-neo-black shadow-[4px_4px_0_0_#000] focus:shadow-[6px_6px_0_0_#00E5FF] focus:outline-none transition-shadow"
+                  autoFocus
+                />
+                {magicLinkError && (
+                  <p className="text-neo-pink font-bold text-xs uppercase">{magicLinkError}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={magicLinkLoading || !magicEmail.trim()}
+                  className="w-full py-3 font-heading font-bold uppercase bg-neo-cyan text-neo-black border-[3px] border-neo-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#000] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {magicLinkLoading ? 'VERIFICANDO...' : 'CONFIRMAR E ENTRAR →'}
+                </button>
+              </form>
+              <button
+                onClick={resetMagicLinkState}
+                className="text-neo-pink font-heading font-bold text-sm uppercase underline underline-offset-4 hover:text-neo-black transition-colors w-full text-center"
+              >
+                ← SOLICITAR NOVO LINK
+              </button>
             </div>
           </Card>
         </div>
@@ -929,6 +994,21 @@ export default function Onboarding() {
               >
                 {loading ? "PROCESSANDO..." : (form.loves.length + form.veto.length) < 10 ? "BLOQUEADO" : "REGISTRAR OPERADOR"}
               </Button>
+
+              {/* Inline save error — replaces browser alert() */}
+              <AnimatePresence>
+                {submitError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="bg-neo-pink text-white border-[3px] border-neo-black shadow-[4px_4px_0_0_#000] px-4 py-3 text-sm font-bold flex items-center gap-2"
+                  >
+                    <span>⚠️</span>
+                    {submitError}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </Card>
           
